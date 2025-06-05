@@ -48,24 +48,19 @@ h2 {
 }
 
 .bin {
-  width: 80px;
-  height: 100px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  width: 22%; /* reduzido para caber 4 em uma linha */
+  text-align: center;
   user-select: none;
   cursor: default;
+  box-sizing: border-box;
+  padding: 5px;
 }
 
 .bin img {
   width: 100%;
   height: auto;
-  max-height: 100px;
-  object-fit: contain;
-  display: block;
-  pointer-events: none;
+  max-width: 80px;
 }
-
 /* Pontos flutuantes */
 #points-float {
   position: absolute;
