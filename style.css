@@ -11,57 +11,47 @@ body {
   margin: auto;
 }
 
-/* Título */
 h2 {
   margin-bottom: 10px;
 }
 
-/* Lixo arrastável */
 #trash-item {
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   margin: 20px auto;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   cursor: grab;
   border: none;
-  touch-action: none;
-  position: fixed;
-  pointer-events: none;
-  z-index: 100;
 }
 
-/* Enquanto arrastando */
 #trash-item:active {
   cursor: grabbing;
 }
 
-/* Lixeiras */
 #bins {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 16px;
-  margin-top: 30px;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 0 5px;
 }
 
 .bin {
-  width: 22%; /* reduzido para caber 4 em uma linha */
+  flex: 0 0 auto;
+  width: 70px;
   text-align: center;
   user-select: none;
-  cursor: default;
-  box-sizing: border-box;
-  padding: 5px;
 }
 
 .bin img {
   width: 100%;
   height: auto;
-  max-width: 80px;
+  max-width: 60px;
 }
-/* Pontos flutuantes */
+
 #points-float {
   position: absolute;
   font-size: 24px;
@@ -84,41 +74,10 @@ h2 {
   }
 }
 
-/* Fim de jogo */
 #game-over {
   display: none;
   color: red;
   font-weight: bold;
   font-size: 1.2em;
   margin-top: 20px;
-}
-
-#gameOverDisplay {
-  display: none;
-  text-align: center;
-}
-
-#gameOverDisplay h3 {
-  font-size: 24px;
-  color: darkred;
-}
-
-#gameOverDisplay p {
-  font-size: 20px;
-  margin-top: 10px;
-}
-
-#restartButton {
-  margin-top: 15px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-#restartButton:hover {
-  background-color: #45a049;
 }
