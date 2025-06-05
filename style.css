@@ -32,24 +32,22 @@ h2 {
 
 #bins {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   flex-wrap: nowrap;
+  gap: 6px;
   overflow-x: auto;
-  gap: 8px;
-  padding: 0 5px;
+  padding: 0 10px;
 }
 
 .bin {
   flex: 0 0 auto;
-  width: 70px;
+  width: 60px;
   text-align: center;
-  user-select: none;
 }
 
 .bin img {
-  width: 100%;
+  width: 50px;
   height: auto;
-  max-width: 60px;
 }
 
 #points-float {
