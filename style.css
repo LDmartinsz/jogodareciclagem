@@ -15,17 +15,10 @@ h2 {
   margin-bottom: 10px;
 }
 
-#trash-zone {
-  height: 100px; /* altura fixa pro lixo */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
 #trash-item {
   width: 80px;
   height: 80px;
+  margin: 20px auto;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -44,8 +37,6 @@ h2 {
   gap: 6px;
   overflow-x: auto;
   padding: 0 10px;
-  height: 100px; /* evita que as lixeiras mudem de posição */
-  align-items: center;
 }
 
 .bin {
@@ -58,7 +49,6 @@ h2 {
   width: 50px;
   height: auto;
 }
-
 #points-float {
   position: absolute;
   font-size: 24px;
