@@ -1,170 +1,115 @@
-const items = [
-  { type: "papel", image: "papel_amassado.png" },
-  { type: "plastico", image: "garrafa_plastica.png" },
-  { type: "metal", image: "lata_refrigerante.png" },
-  { type: "vidro", image: "pote_vidro.png" }
-];
+const item = document.getElementById("item");
+const bins = document.querySelectorAll(".bin");
+const scoreDisplay = document.getElementById("score");
 
+const trashTypes = ["papel", "metal", "vidro", "plastico"];
+const trashImages = {
+  papel: "papel_amassado.png",
+  metal: "lata_refrigerante.png",
+  vidro: "pote_vidro.png",
+  plastico: "garrafa_plastica.png"
+};
+
+let currentType = "";
 let score = 0;
 let errors = 0;
-let correctStreak = 0;
-let currentItem = null;
 
-const trashItem = document.getElementById("trash-item");
-const scoreDisplay = document.getElementById("score");
-const errorDisplay = document.getElementById("errors");
-const gameOverDisplay = document.getElementById("gameOverDisplay");
-const finalScore = document.getElementById("finalScore");
-const restartButton = document.getElementById("restartButton");
-const bins = document.querySelectorAll(".bin");
-
-function getRandomItem() {
-  return items[Math.floor(Math.random() * items.length)];
+function newItem() {
+  currentType = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+  item.style.backgroundImage = `url(${trashImages[currentType]})`;
+  item.style.backgroundSize = "cover";
 }
+newItem();
 
-function loadNewItem() {
-  currentItem = getRandomItem();
-  trashItem.style.backgroundImage = `url(${currentItem.image})`;
+item.addEventListener("dragstart", (e) => {
+  e.dataTransfer.setData("text/plain", currentType);
+});
 
-  // Reset posição caso tenha ficado fixa no drag anterior
-  trashItem.style.position = "relative";
-  trashItem.style.left = "";
-  trashItem.style.top = "";
-  trashItem.style.zIndex = "";
-}
+bins.forEach((bin) => {
+  bin.addEventListener("dragover", (e) => {
+    e.preventDefault();
+  });
 
-// Floating points animation
-function showFloatingPoints(text) {
-  const float = document.getElementById("points-float");
-  float.textContent = text;
-  float.style.left = trashItem.offsetLeft + 30 + "px";
-  float.style.top = trashItem.offsetTop - 10 + "px";
-  float.style.display = "block";
-  float.style.animation = "none";
-  void float.offsetWidth;
-  float.style.animation = "floatUp 1s ease-out forwards";
+  bin.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const droppedType = e.dataTransfer.getData("text/plain");
+    if (droppedType === bin.dataset.type) {
+      score++;
+    } else {
+      errors++;
+    }
 
-  setTimeout(() => {
-    float.style.display = "none";
-  }, 1000);
-}
+    if (errors >= 5) {
+      alert("Você perdeu! Pontuação final: " + score);
+      score = 0;
+      errors = 0;
+    }
 
-// Variáveis para drag personalizado
-let dragging = false;
-let offsetX = 0;
-let offsetY = 0;
+    scoreDisplay.textContent = `Pontuação: ${score} | Erros: ${errors}/5`;
+    newItem();
+  });
+});
 
-function startDrag(e) {
-  dragging = true;
-  const rect = trashItem.getBoundingClientRect();
+// Suporte para toque em celulares
+let touchOffsetX = 0;
+let touchOffsetY = 0;
 
-  let clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
-  let clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+item.addEventListener("touchstart", function (e) {
+  const touch = e.touches[0];
+  const rect = item.getBoundingClientRect();
+  touchOffsetX = touch.clientX - rect.left;
+  touchOffsetY = touch.clientY - rect.top;
+  item.style.position = "absolute";
+  item.style.zIndex = 1000;
+});
 
-  offsetX = clientX - rect.left;
-  offsetY = clientY - rect.top;
-
-  trashItem.style.position = "fixed";
-  trashItem.style.zIndex = 1000;
-  moveAt(clientX, clientY);
-
+item.addEventListener("touchmove", function (e) {
   e.preventDefault();
-}
+  const touch = e.touches[0];
+  item.style.left = touch.clientX - touchOffsetX + "px";
+  item.style.top = touch.clientY - touchOffsetY + "px";
+}, { passive: false });
 
-function moveAt(clientX, clientY) {
-  trashItem.style.left = clientX - offsetX + "px";
-  trashItem.style.top = clientY - offsetY + "px";
-}
+item.addEventListener("touchend", function () {
+  const itemCenter = {
+    x: item.offsetLeft + item.offsetWidth / 2,
+    y: item.offsetTop + item.offsetHeight / 2
+  };
 
-function onDrag(e) {
-  if (!dragging) return;
-
-  let clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
-  let clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
-
-  moveAt(clientX, clientY);
-
-  e.preventDefault();
-}
-
-function endDrag(e) {
-  if (!dragging) return;
-  dragging = false;
-
-  const rect = trashItem.getBoundingClientRect();
-  const centerX = rect.left + rect.width / 2;
-  const centerY = rect.top + rect.height / 2;
-
-  let droppedInBin = false;
-
+  let matched = false;
   bins.forEach(bin => {
-    const binRect = bin.getBoundingClientRect();
-
+    const rect = bin.getBoundingClientRect();
     if (
-      centerX > binRect.left &&
-      centerX < binRect.right &&
-      centerY > binRect.top &&
-      centerY < binRect.bottom
+      itemCenter.x > rect.left &&
+      itemCenter.x < rect.right &&
+      itemCenter.y > rect.top &&
+      itemCenter.y < rect.bottom
     ) {
-      const binType = bin.getAttribute("data-type");
-      if (currentItem.type === binType) {
-        score += 100;
-        correctStreak++;
-        showFloatingPoints("100");
-        if (correctStreak % 5 === 0) {
-          score += 200;
-          showFloatingPoints("Bônus! +200");
-        }
-        scoreDisplay.textContent = score;
+      if (bin.dataset.type === currentType) {
+        score++;
       } else {
         errors++;
-        correctStreak = 0;
-        errorDisplay.textContent = errors;
-
-        if (errors >= 5) {
-          trashItem.style.display = "none";
-          finalScore.textContent = `Sua pontuação: ${score} pontos`;
-          gameOverDisplay.style.display = "block";
-          return;
-        }
       }
-
-      droppedInBin = true;
-      loadNewItem();
+      matched = true;
     }
   });
 
-  if (!droppedInBin) {
-    // Voltar para posição inicial
-    trashItem.style.left = "";
-    trashItem.style.top = "";
-    trashItem.style.position = "relative";
-    trashItem.style.zIndex = "";
+  if (!matched) {
+    errors++;
   }
 
-  e.preventDefault();
-}
+  if (errors >= 5) {
+    alert("Você perdeu! Pontuação final: " + score);
+    score = 0;
+    errors = 0;
+  }
 
-// Eventos mouse e touch para drag personalizado
-trashItem.addEventListener("mousedown", startDrag);
-trashItem.addEventListener("touchstart", startDrag);
+  scoreDisplay.textContent = `Pontuação: ${score} | Erros: ${errors}/5`;
 
-document.addEventListener("mousemove", onDrag);
-document.addEventListener("touchmove", onDrag, { passive: false });
+  item.style.left = "";
+  item.style.top = "";
+  item.style.position = "";
+  item.style.zIndex = "";
 
-document.addEventListener("mouseup", endDrag);
-document.addEventListener("touchend", endDrag);
-document.addEventListener("touchcancel", endDrag);
-
-restartButton.addEventListener("click", () => {
-  score = 0;
-  errors = 0;
-  correctStreak = 0;
-  scoreDisplay.textContent = score;
-  errorDisplay.textContent = errors;
-  trashItem.style.display = "block";
-  gameOverDisplay.style.display = "none";
-  loadNewItem();
+  newItem();
 });
-
-loadNewItem();
