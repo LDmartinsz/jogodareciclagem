@@ -16,23 +16,24 @@ const errorDisplay = document.getElementById("errors");
 const gameOverDisplay = document.getElementById("gameOverDisplay");
 const finalScore = document.getElementById("finalScore");
 const restartButton = document.getElementById("restartButton");
+const bins = document.querySelectorAll(".bin");
 
-// Função para escolher item aleatório
 function getRandomItem() {
   return items[Math.floor(Math.random() * items.length)];
 }
 
-// Função para carregar novo item
 function loadNewItem() {
   currentItem = getRandomItem();
   trashItem.style.backgroundImage = `url(${currentItem.image})`;
+
+  // Reset posição caso tenha ficado fixa no drag anterior
   trashItem.style.position = "relative";
-  trashItem.style.left = "auto";
-  trashItem.style.top = "auto";
-  trashItem.style.zIndex = "auto";
+  trashItem.style.left = "";
+  trashItem.style.top = "";
+  trashItem.style.zIndex = "";
 }
 
-// Mostrar pontos flutuantes
+// Floating points animation
 function showFloatingPoints(text) {
   const float = document.getElementById("points-float");
   float.textContent = text;
@@ -48,97 +49,64 @@ function showFloatingPoints(text) {
   }, 1000);
 }
 
-// Drag and drop com mouse - já existente
-trashItem.addEventListener("dragstart", e => {
-  e.dataTransfer.setData("text/plain", currentItem.type);
-});
+// Variáveis para drag personalizado
+let dragging = false;
+let offsetX = 0;
+let offsetY = 0;
 
-document.querySelectorAll(".bin").forEach(bin => {
-  bin.addEventListener("dragover", e => e.preventDefault());
+function startDrag(e) {
+  dragging = true;
+  const rect = trashItem.getBoundingClientRect();
 
-  bin.addEventListener("drop", e => {
-    e.preventDefault();
-    const droppedType = e.dataTransfer.getData("text/plain");
-    const binType = bin.getAttribute("data-type");
+  let clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
+  let clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
 
-    if (droppedType === binType) {
-      score += 100;
-      correctStreak++;
-      showFloatingPoints("100");
-      if (correctStreak % 5 === 0) {
-        score += 200;
-        showFloatingPoints("Bônus! +200");
-      }
-      scoreDisplay.textContent = score;
-    } else {
-      errors++;
-      correctStreak = 0;
-      errorDisplay.textContent = errors;
+  offsetX = clientX - rect.left;
+  offsetY = clientY - rect.top;
 
-      if (errors >= 5) {
-        trashItem.style.display = "none";
-        finalScore.textContent = `Sua pontuação: ${score} pontos`;
-        gameOverDisplay.style.display = "block";
-        return;
-      }
-    }
+  trashItem.style.position = "fixed";
+  trashItem.style.zIndex = 1000;
+  moveAt(clientX, clientY);
 
-    loadNewItem();
-  });
-});
-
-// Variáveis para controle do toque
-let isTouchDragging = false;
-let touchOffsetX = 0;
-let touchOffsetY = 0;
-
-// Função para detectar se o ponto (x, y) está dentro de um elemento
-function isPointInsideElement(x, y, element) {
-  const rect = element.getBoundingClientRect();
-  return (
-    x >= rect.left &&
-    x <= rect.right &&
-    y >= rect.top &&
-    y <= rect.bottom
-  );
+  e.preventDefault();
 }
 
-// Eventos para touch drag no #trash-item
-trashItem.addEventListener("touchstart", e => {
-  e.preventDefault();
-  isTouchDragging = true;
+function moveAt(clientX, clientY) {
+  trashItem.style.left = clientX - offsetX + "px";
+  trashItem.style.top = clientY - offsetY + "px";
+}
 
-  const touch = e.touches[0];
+function onDrag(e) {
+  if (!dragging) return;
+
+  let clientX = e.type.startsWith("touch") ? e.touches[0].clientX : e.clientX;
+  let clientY = e.type.startsWith("touch") ? e.touches[0].clientY : e.clientY;
+
+  moveAt(clientX, clientY);
+
+  e.preventDefault();
+}
+
+function endDrag(e) {
+  if (!dragging) return;
+  dragging = false;
+
   const rect = trashItem.getBoundingClientRect();
-  touchOffsetX = touch.clientX - rect.left;
-  touchOffsetY = touch.clientY - rect.top;
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
 
-  trashItem.style.position = "absolute";
-  trashItem.style.zIndex = 1000;
-});
+  let droppedInBin = false;
 
-trashItem.addEventListener("touchmove", e => {
-  if (!isTouchDragging) return;
-  e.preventDefault();
+  bins.forEach(bin => {
+    const binRect = bin.getBoundingClientRect();
 
-  const touch = e.touches[0];
-  trashItem.style.left = (touch.clientX - touchOffsetX) + "px";
-  trashItem.style.top = (touch.clientY - touchOffsetY) + "px";
-});
-
-trashItem.addEventListener("touchend", e => {
-  if (!isTouchDragging) return;
-  e.preventDefault();
-  isTouchDragging = false;
-
-  let droppedOnBin = false;
-  const touch = e.changedTouches[0];
-
-  document.querySelectorAll(".bin").forEach(bin => {
-    if (isPointInsideElement(touch.clientX, touch.clientY, bin)) {
-      droppedOnBin = true;
+    if (
+      centerX > binRect.left &&
+      centerX < binRect.right &&
+      centerY > binRect.top &&
+      centerY < binRect.bottom
+    ) {
       const binType = bin.getAttribute("data-type");
-
       if (currentItem.type === binType) {
         score += 100;
         correctStreak++;
@@ -160,19 +128,34 @@ trashItem.addEventListener("touchend", e => {
           return;
         }
       }
+
+      droppedInBin = true;
       loadNewItem();
     }
   });
 
-  if (!droppedOnBin) {
+  if (!droppedInBin) {
+    // Voltar para posição inicial
+    trashItem.style.left = "";
+    trashItem.style.top = "";
     trashItem.style.position = "relative";
-    trashItem.style.left = "auto";
-    trashItem.style.top = "auto";
-    trashItem.style.zIndex = "auto";
+    trashItem.style.zIndex = "";
   }
-});
 
-// Reiniciar jogo
+  e.preventDefault();
+}
+
+// Eventos mouse e touch para drag personalizado
+trashItem.addEventListener("mousedown", startDrag);
+trashItem.addEventListener("touchstart", startDrag);
+
+document.addEventListener("mousemove", onDrag);
+document.addEventListener("touchmove", onDrag, { passive: false });
+
+document.addEventListener("mouseup", endDrag);
+document.addEventListener("touchend", endDrag);
+document.addEventListener("touchcancel", endDrag);
+
 restartButton.addEventListener("click", () => {
   score = 0;
   errors = 0;
