@@ -7,6 +7,26 @@ body {
   -webkit-tap-highlight-color: transparent; /* remove efeito azul no toque */
 }
 
+
+#bins {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.bin {
+  width: 80px;
+  text-align: center;
+  user-select: none;
+}
+
+.bing img {
+  width: 100%;
+  height: auto;
+  max-width: 80px;
+}
+
 #game-container {
   max-width: 700px;
   margin: auto;
