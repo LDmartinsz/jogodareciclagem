@@ -4,39 +4,19 @@ body {
   text-align: center;
   padding: 20px;
   margin: 0;
-  -webkit-tap-highlight-color: transparent; /* remove efeito azul no toque */
-}
-
-
-#bins {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
-.bin {
-  width: 80px;
-  text-align: center;
-  user-select: none;
-}
-
-.bing img {
-  width: 100%;
-  height: auto;
-  max-width: 80px;
 }
 
 #game-container {
   max-width: 700px;
   margin: auto;
-  position: relative;
 }
 
+/* Título */
 h2 {
   margin-bottom: 10px;
 }
 
+/* Lixo arrastável */
 #trash-item {
   width: 100px;
   height: 100px;
@@ -46,11 +26,104 @@ h2 {
   background-position: center;
   cursor: grab;
   border: none;
-  position: relative; /* para poder mudar para fixed no drag */
-  touch-action: none; /* evita scroll ao arrastar no touch */
-  user-select: none; /* evita seleção de texto */
+  touch-action: none;
+  position: fixed;
+  pointer-events: none;
+  z-index: 100;
 }
 
+/* Enquanto arrastando */
 #trash-item:active {
   cursor: grabbing;
+}
+
+/* Lixeiras */
+#bins {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.bin {
+  width: 80px;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  user-select: none;
+  cursor: default;
+}
+
+.bin img {
+  width: 100%;
+  height: auto;
+  max-height: 100px;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+/* Pontos flutuantes */
+#points-float {
+  position: absolute;
+  font-size: 24px;
+  font-weight: bold;
+  color: green;
+  animation: floatUp 1s ease-out forwards;
+  pointer-events: none;
+  display: none;
+  z-index: 10;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px);
+  }
+}
+
+/* Fim de jogo */
+#game-over {
+  display: none;
+  color: red;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin-top: 20px;
+}
+
+#gameOverDisplay {
+  display: none;
+  text-align: center;
+}
+
+#gameOverDisplay h3 {
+  font-size: 24px;
+  color: darkred;
+}
+
+#gameOverDisplay p {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+#restartButton {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#restartButton:hover {
+  background-color: #45a049;
 }
