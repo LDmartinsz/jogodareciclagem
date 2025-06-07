@@ -1,8 +1,11 @@
 const items = [
-  { type: "papel", image: "papel_amassado.png" },
+  { type: "papel", image: "caixa_de_suco.png" },
+    { type: "papel", image: "papel_amassado.png" },
   { type: "plastico", image: "garrafa_plastica.png" },
+   { type: "plastico", image: "caneta.png" },
+  { type: "metal", image: "clip_de_papel.png" },
   { type: "metal", image: "lata_refrigerante.png" },
-  { type: "vidro", image: "pote_vidro.png" }
+  { type: "vidro", image: "copo_de_vidro.png" }
 ];
 
 let score = 0;
